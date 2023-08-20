@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,6 +26,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: StudentRecyclerViewAdapter
 
 
+//    for update or delete a student
+
+    private lateinit var selectedStudent: Student
+    private var isListItemClicked = false
+
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -42,11 +50,26 @@ class MainActivity : AppCompatActivity() {
 
         initRecyclerView()
         saveButton.setOnClickListener{
-            saveStudentData()
-            clearInputs()
+            if (isListItemClicked){
+                updateStudentData()
+                clearInputs()
+
+            }else {
+
+                saveStudentData()
+                clearInputs()
+            }
         }
         clearButton.setOnClickListener {
-            clearInputs()
+            if (isListItemClicked){
+                deleteStudentData()
+                clearInputs()
+            }
+            else{
+                clearInputs()
+            }
+
+
         }
 
 
@@ -70,7 +93,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun initRecyclerView(){
         studentRecyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = StudentRecyclerViewAdapter()
+        adapter = StudentRecyclerViewAdapter {
+                selectedItem: Student -> listItemClicked(selectedItem)
+        }
         studentRecyclerView.adapter = adapter
         displayStudentsList()
     }
@@ -81,5 +106,50 @@ class MainActivity : AppCompatActivity() {
             adapter.setList(it)
             adapter.notifyDataSetChanged()
         }
+    }
+
+
+    private fun listItemClicked(student: Student){
+//        Toast.makeText(this,
+//            "Student name is ${student.name}"
+//        , Toast.LENGTH_SHORT
+//            ).show()
+
+        selectedStudent = student
+        saveButton.text = "Update"
+        clearButton.text = "Delete"
+        isListItemClicked = true
+
+        nameEditText.setText(selectedStudent.name)
+        ageEditText.setText(selectedStudent.age.toString())
+
+   }
+    private fun updateStudentData(){
+        viewModel.updateStudent(
+            Student(
+                selectedStudent.id,
+                nameEditText.text.toString(),
+                ageEditText.text.toString().toInt()
+
+            )
+        )
+//        selectedStudent = null
+        saveButton.text = "Save"
+        clearButton.text = "Clear"
+        isListItemClicked = false
+    }
+
+    private fun deleteStudentData(){
+        viewModel.deleteStudent(
+            Student(
+                selectedStudent.id,
+                selectedStudent.name,
+                selectedStudent.age
+            )
+        )
+//        selectedStudent = null
+        saveButton.text = "Save"
+        clearButton.text = "Clear"
+        isListItemClicked = false
     }
 }

@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.studentregister.db.Student
 
-class StudentRecyclerViewAdapter():RecyclerView.Adapter<StudentViewHolder>() {
+class StudentRecyclerViewAdapter(private val clickListener:(Student) -> Unit):RecyclerView.Adapter<StudentViewHolder>() {
 
     private val studentList = ArrayList<Student>()
 
@@ -22,7 +22,7 @@ class StudentRecyclerViewAdapter():RecyclerView.Adapter<StudentViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: StudentViewHolder, position: Int) {
-        holder.bind(studentList[position])
+        holder.bind(studentList[position],clickListener)
     }
 
     fun setList(students : List<Student>){
@@ -33,13 +33,15 @@ class StudentRecyclerViewAdapter():RecyclerView.Adapter<StudentViewHolder>() {
 }
 
 class StudentViewHolder(private val view:View):RecyclerView.ViewHolder(view){
-    fun bind(student: Student){
+    fun bind(student: Student,clickListener:(Student) -> Unit){
         val nameTextView = view.findViewById<TextView>(R.id.tvName)
         val ageTextView = view.findViewById<TextView>(R.id.tvAge)
 
         nameTextView.text = student.name
         ageTextView.text = student.age.toString()
-
+        view.setOnClickListener{
+            clickListener(student)
+        }
 
     }
 }
